@@ -23,25 +23,20 @@ public class OrderService implements IOrderService{
 	@Override
 	public OrderDto getOrder(Long id) {
 		return orderRepository.findById(id)
-				.map(order -> new OrderDto(
-						order.getId(), 
-						order.getNumber(), 
-						order.getClient(), 
-						order.getTotal(), 
-						order.getDateOrder(), 
-						listEntityToDto(order.getOrdersDetailsList())))
+				.map(order -> createOrderDto(order))
 				.orElse(null);
 	}
 	
 	@Override
+	public OrderDto getOrderDetail(Long id) {
+		return orderRepository.findById(id)
+				.map(order -> createOrderWithDtoDetail(order))
+				.orElse(null);
+	}
+		
+	@Override
 	public OrderDto saveOrder(OrderDto order) {
-		OrderEntity orden = new OrderEntity(
-				order.getId(), 
-				order.getNumber(), 
-				order.getClient(), 
-				order.getTotal(), 
-				order.getDateOrder(), 
-				null);
+		OrderEntity orden = createOrderEntity(order);
 		
 		orden.setOrdersDetailsList(listDtoToEntity(order.getOrdersDetailsList(), orden));		
 		OrderEntity savedOrder = orderRepository.save(orden);
@@ -50,13 +45,7 @@ public class OrderService implements IOrderService{
 
 	@Override
 	public OrderDto updateOrder(OrderDto order) {
-		OrderEntity orden = new OrderEntity(
-				order.getId(), 
-				order.getNumber(), 
-				order.getClient(), 
-				order.getTotal(), 
-				order.getDateOrder(), 
-				null);
+		OrderEntity orden = createOrderEntity(order);
 		
 		orden.setOrdersDetailsList(listDtoToEntity(order.getOrdersDetailsList(), orden));		
 		OrderEntity savedOrder = orderRepository.save(orden);
@@ -72,13 +61,7 @@ public class OrderService implements IOrderService{
 	public List<OrderDto> getAllOrders() {
 		List<OrderDto> list = new ArrayList<>();
 		for (OrderEntity order: orderRepository.findAll()) {
-			list.add(new OrderDto(
-					order.getId(), 
-					order.getNumber(), 
-					order.getClient(), 
-					order.getTotal(), 
-					order.getDateOrder(), 
-					null));
+			list.add(createOrderDto(order));
 		}
 		return list;
 	}
@@ -88,13 +71,7 @@ public class OrderService implements IOrderService{
 		for (OrderDetailEntity entity : listEntity) {
 			list.add(new OrderDetailsDto(
 					entity.getId(), 
-					new OrderDto(
-							entity.getOrder().getId(), 
-							entity.getOrder().getNumber(), 
-							entity.getOrder().getClient(), 
-							entity.getOrder().getTotal(), 
-							entity.getOrder().getDateOrder(), 
-							null), 
+					createOrderDto(entity.getOrder()),
 					entity.getDetail(), 
 					entity.getCantidad(), 
 					entity.getPrecioUnitario(), 
@@ -115,5 +92,32 @@ public class OrderService implements IOrderService{
 					dto.getTotalDetail()));
 		}
 		return list;
+	}
+	
+	
+	private OrderEntity createOrderEntity(OrderDto order) {
+		return new OrderEntity(
+				order.getId(), 
+				order.getNumber(), 
+				order.getClient(), 
+				order.getTotal(), 
+				order.getDateOrder(), 
+				null);
+	}
+	
+	private OrderDto createOrderDto(OrderEntity entity) {
+		return 	new OrderDto(
+				entity.getId(), 
+				entity.getNumber(), 
+				entity.getClient(), 
+				entity.getTotal(), 
+				entity.getDateOrder(), 
+				null);
+	}	 
+	
+	private OrderDto createOrderWithDtoDetail(OrderEntity entity) {
+		OrderDto orderDto = createOrderDto(entity);
+		orderDto.setOrdersDetailsList(listEntityToDto(entity.getOrdersDetailsList()));
+		return 	orderDto;
 	}
 }

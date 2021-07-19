@@ -19,89 +19,64 @@ public class OrderDetailService implements IOrderDetailService{
 	public OrderDetailsDto getOrderDetail(Long id) {
 		return orderDetailRepository.findById(id)
 				.map(orderDetail -> 
-				new OrderDetailsDto(
-						orderDetail.getId(), 
-						new OrderDto(
-								orderDetail.getOrder().getId(), 
-								orderDetail.getOrder().getNumber(), 
-								orderDetail.getOrder().getClient(),
-								orderDetail.getOrder().getTotal(), 
-								orderDetail.getOrder().getDateOrder(),
-								null), 
-						orderDetail.getDetail(), 
-						orderDetail.getCantidad(), 
-						orderDetail.getPrecioUnitario(), 
-						orderDetail.getTotalDetail()))
+				newOrderDetailsDto(orderDetail))
 				.orElse(null);
 	}
-	
-	
+		
 	@Override
 	public OrderDetailsDto saveOrderDetail(OrderDetailsDto orderDetail) {
-		OrderDetailEntity savedOrderDetail = orderDetailRepository.save(
-				new OrderDetailEntity(
-						orderDetail.getId(), 
-						new OrderEntity(
-								orderDetail.getOrder().getId(),
-								orderDetail.getOrder().getNumber(),
-								orderDetail.getOrder().getClient(),
-								orderDetail.getOrder().getTotal(),
-								orderDetail.getOrder().getDateOrder(),
-								null),
-						orderDetail.getDetail(), 
-						orderDetail.getCantidad(), 
-						orderDetail.getPrecioUnitario(), 
-						orderDetail.getTotalDetail()));
-				
-		return new OrderDetailsDto(
-				savedOrderDetail.getId(), 
-				new OrderDto(
-						savedOrderDetail.getOrder().getId(), 
-						savedOrderDetail.getOrder().getNumber(), 
-						savedOrderDetail.getOrder().getClient(), 
-						savedOrderDetail.getOrder().getTotal(), 
-						savedOrderDetail.getOrder().getDateOrder(), 
-						null), 
-				savedOrderDetail.getDetail(), 
-				savedOrderDetail.getCantidad(), 
-				savedOrderDetail.getPrecioUnitario(), 
-				savedOrderDetail.getTotalDetail());
+		OrderDetailEntity savedOrderDetail = orderDetailRepository.save(newOrderDetailsEntity(orderDetail));				
+		return newOrderDetailsDto(savedOrderDetail);
 	}
 
 	@Override
 	public OrderDetailsDto updateOrderDetail(OrderDetailsDto orderDetail) {
-		OrderDetailEntity savedOrderDetail = orderDetailRepository.save(new OrderDetailEntity(
-				orderDetail.getId(), 
-				new OrderEntity(
-						orderDetail.getOrder().getId(),
-						orderDetail.getOrder().getNumber(),
-						orderDetail.getOrder().getClient(),
-						orderDetail.getOrder().getTotal(),
-						orderDetail.getOrder().getDateOrder(),
-						null
-						),
-				orderDetail.getDetail(), 
-				orderDetail.getCantidad(), 
-				orderDetail.getPrecioUnitario(), 
-				orderDetail.getTotalDetail()));
-		
-		return new OrderDetailsDto(
-				savedOrderDetail.getId(), 
-				new OrderDto(
-						savedOrderDetail.getOrder().getId(), 
-						savedOrderDetail.getOrder().getNumber(), 
-						savedOrderDetail.getOrder().getClient(), 
-						savedOrderDetail.getOrder().getTotal(), 
-						savedOrderDetail.getOrder().getDateOrder(), 
-						null), 
-				savedOrderDetail.getDetail(), 
-				savedOrderDetail.getCantidad(), 
-				savedOrderDetail.getPrecioUnitario(), 
-				savedOrderDetail.getTotalDetail());
+		OrderDetailEntity savedOrderDetail = orderDetailRepository.save(newOrderDetailsEntity(orderDetail));		
+		return newOrderDetailsDto(savedOrderDetail);
 	}
 
 	@Override
 	public void deleteOrderDetail(Long id) {
 		orderDetailRepository.deleteById(id);
+	}
+	
+	private OrderDto createOrderDto(OrderEntity orderEntity) {
+		return new OrderDto(
+				orderEntity.getId(), 
+				orderEntity.getNumber(), 
+				orderEntity.getClient(),
+				orderEntity.getTotal(), 
+				orderEntity.getDateOrder(),
+				null);
+	}
+	
+	private OrderEntity createOrderEntity(OrderDto orderDto) {
+		return new OrderEntity(
+				orderDto.getId(),
+				orderDto.getNumber(),
+				orderDto.getClient(),
+				orderDto.getTotal(),
+				orderDto.getDateOrder(),
+				null);
+	}
+	
+	private OrderDetailsDto newOrderDetailsDto(OrderDetailEntity savedOrderDetail) {
+		return new OrderDetailsDto(
+				savedOrderDetail.getId(), 
+				createOrderDto(savedOrderDetail.getOrder()),
+				savedOrderDetail.getDetail(), 
+				savedOrderDetail.getCantidad(), 
+				savedOrderDetail.getPrecioUnitario(), 
+				savedOrderDetail.getTotalDetail());
+	}
+	
+	private OrderDetailEntity newOrderDetailsEntity(OrderDetailsDto orderDetail) {
+		return new OrderDetailEntity(
+				orderDetail.getId(), 
+				createOrderEntity(orderDetail.getOrder()),
+				orderDetail.getDetail(), 
+				orderDetail.getCantidad(), 
+				orderDetail.getPrecioUnitario(), 
+				orderDetail.getTotalDetail());
 	}
 }

@@ -27,10 +27,16 @@ public class OrderController {
 	@Autowired
 	private IOrderService orderService;
 
-	@GetMapping(value = "/{id}/details")
+	@GetMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public OrderDto getOrder(@PathVariable Long id) {
 		return orderService.getOrder(id);
+	}
+	
+	@GetMapping(value = "/{id}/details")
+	@ResponseStatus(HttpStatus.OK)
+	public OrderDto getOrderDetail(@PathVariable Long id) {
+		return orderService.getOrderDetail(id);
 	}
 	
 	@PostMapping
